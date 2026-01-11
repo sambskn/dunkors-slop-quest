@@ -1,5 +1,5 @@
 build: 
-    pdc . build/fun.pdx
+    pdc src build/dsq.pdx
 
 run:
-    cd build && PlaydateSimulator fun.pdx
+    cd build && PlaydateSimulator dsq.pdx
