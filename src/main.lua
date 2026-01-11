@@ -1,13 +1,11 @@
 import "CoreLibs/graphics"
+import "CoreLibs/sprites"
+import "CoreLibs/timer"
 
 local gfx = playdate.graphics
 
 local system6Font = gfx.font.new("fonts/SYSTEM6")
 gfx.setFont(system6Font)
-
-local playerImage = gfx.image.new("pics/player")
-local playerBackImage = gfx.image.new("pics/playerBack")
-local playerRightImage = gfx.image.new("pics/playerRight")
 
 local tilesImageTable = gfx.imagetable.new("pics/tiles")
 local tilemap = gfx.tilemap.new()
@@ -22,70 +20,103 @@ tilemap:setTiles({
   1,1,1,1,1,1,1,1,1,1,1,1,
 }, 12)
 
+local tilemapOffsetX = 8
+local tilemapOffsetY = 8
+
+-- these assume that tilemap is 32 x 32 squares
+function gridToScreenX(x)
+  return x * 32 + tilemapOffsetX + 16
+end
+function gridToScreenY(y)
+  return y * 32 + tilemapOffsetY + 16
+end
+
+local playerImage = gfx.image.new("pics/player")
+local playerBackImage = gfx.image.new("pics/playerBack")
+local playerRightImage = gfx.image.new("pics/playerRight")
+
+local playerSprite = gfx.sprite.new(playerImage)
+
+local x = 1
+local y = 1
+
+function wrapXY()
+  if x > 11 then
+    x = 0
+  end
+  if x < 0 then
+    x = 11
+  end
+  if y > 6 then
+    y = 0
+  end
+  if y < 0 then
+    y = 6
+  end
+end
+
+playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
+playerSprite:add()
+
+
 gfx.setColor(gfx.kColorWhite)
 gfx.fillRect(0,0,400,240)
 
-local x = 200
-local y = 120
-
-local leftDown = false
-local rightDown = false
-local upDown = false
-local downDown = false
-
-local labelOffset = 16
-local speed = 2
+gfx.sprite.setBackgroundDrawingCallback(
+  function( x, y, width, height)
+    tilemap:draw(tilemapOffsetX, tilemapOffsetY)
+  end
+)
 
 local lastDir = "down"
-
-local tilemapOffsetX = 8
-local tilemapOffsetY = 8
 
 function playdate.update()
   gfx.setColor(gfx.kColorWhite)
   gfx.fillRect(0,0,400,240)
-  
-  tilemap:draw(tilemapOffsetX,tilemapOffsetY)
-  
+  gfx.sprite.update()
   gfx.setColor(gfx.kColorBlack)
   if lastDir == "down" then
-    playerImage:drawAnchored(x, y, 0.5, 0.5)
+    playerSprite:setImage(playerImage)
   elseif lastDir == "up" then
-    playerBackImage:drawAnchored(x, y, 0.5, 0.5)
+    playerSprite:setImage(playerBackImage)
   elseif lastDir == "right" then
-    playerRightImage:drawAnchored(x, y, 0.5, 0.5)
+    playerSprite:setImage(playerRightImage)
   elseif lastDir == "left" then
-    playerRightImage:drawAnchored(x, y, 0.5, 0.5, gfx.kImageFlippedX)
-  end
-  
-  if leftDown then
-    x -= 1 * speed
-    lastDir = "left"
-  end
-  if rightDown then
-    x += 1 * speed
-    lastDir = "right"
-  end
-  if upDown then
-    y -= 1 * speed
-    lastDir = "up"
-  end
-  if downDown then
-    y += 1 * speed
-    lastDir = "down"
+    playerSprite:setImage(playerRightImage, gfx.kImageFlippedX)
   end
 
-  gfx.drawText("it YOU playboy", x + labelOffset, y + labelOffset)
-
+  playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
   playdate.drawFPS(0,0)
 end
 
 
-function playdate.leftButtonDown() leftDown = true end
-function playdate.leftButtonUp() leftDown = false end
-function playdate.rightButtonDown() rightDown = true end
-function playdate.rightButtonUp() rightDown = false end
-function playdate.upButtonDown() upDown = true end
-function playdate.upButtonUp() upDown = false end
-function playdate.downButtonDown() downDown = true end
-function playdate.downButtonUp() downDown = false end
+--left button
+function playdate.leftButtonDown()
+  x -= 1
+  lastDir = "left"
+  wrapXY()
+end
+
+
+--right button
+function playdate.rightButtonDown()
+  x += 1
+  lastDir = "right"
+  wrapXY()
+end
+
+--down button
+function playdate.downButtonDown()
+  y += 1
+  lastDir = "down"
+  wrapXY()      
+end
+
+
+--up button
+function playdate.upButtonDown()
+  y -= 1
+  lastDir = "up"
+  wrapXY()      
+end
+
