@@ -9,6 +9,19 @@ local playerImage = gfx.image.new("pics/player")
 local playerBackImage = gfx.image.new("pics/playerBack")
 local playerRightImage = gfx.image.new("pics/playerRight")
 
+local tilesImageTable = gfx.imagetable.new("pics/tiles")
+local tilemap = gfx.tilemap.new()
+tilemap:setImageTable(tilesImageTable)
+tilemap:setTiles({
+  1,1,1,1,1,1,1,1,1,1,1,1,
+  1,2,2,2,2,2,2,2,2,2,2,1,
+  1,2,2,2,2,2,2,2,2,2,2,1,
+  1,2,2,2,2,2,2,2,2,2,2,1,
+  1,2,2,2,2,2,2,2,2,2,2,1,
+  1,2,2,2,2,2,2,2,2,2,2,1,
+  1,1,1,1,1,1,1,1,1,1,1,1,
+}, 12)
+
 gfx.setColor(gfx.kColorWhite)
 gfx.fillRect(0,0,400,240)
 
@@ -25,10 +38,15 @@ local speed = 2
 
 local lastDir = "down"
 
+local tilemapOffsetX = 8
+local tilemapOffsetY = 8
+
 function playdate.update()
   gfx.setColor(gfx.kColorWhite)
   gfx.fillRect(0,0,400,240)
-
+  
+  tilemap:draw(tilemapOffsetX,tilemapOffsetY)
+  
   gfx.setColor(gfx.kColorBlack)
   if lastDir == "down" then
     playerImage:drawAnchored(x, y, 0.5, 0.5)
