@@ -21,7 +21,7 @@ tilemap:setTiles({
 }, 12)
 
 local tilemapOffsetX = 8
-local tilemapOffsetY = 8
+local tilemapOffsetY = 2
 
 -- these assume that tilemap is 32 x 32 squares
 function gridToScreenX(x)
@@ -34,7 +34,7 @@ end
 local playerImage = gfx.image.new("pics/player")
 local playerBackImage = gfx.image.new("pics/playerBack")
 local playerRightImage = gfx.image.new("pics/playerRight")
-
+local playerZ = 5
 local playerSprite = gfx.sprite.new(playerImage)
 
 local x = 1
@@ -56,8 +56,17 @@ function wrapXY()
 end
 
 playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
+playerSprite:setZIndex(playerZ)
 playerSprite:add()
 
+local stairsImage = gfx.image.new("pics/stairs")
+local stairsSprite = gfx.sprite.new(stairsImage)
+local stairX = 5
+local stairY = 3
+local stairZ = 4
+stairsSprite:moveTo(gridToScreenX(stairX), gridToScreenY(stairY))
+stairsSprite:setZIndex(stairZ)
+stairsSprite:add()
 
 gfx.setColor(gfx.kColorWhite)
 gfx.fillRect(0,0,400,240)
@@ -69,6 +78,14 @@ gfx.sprite.setBackgroundDrawingCallback(
 )
 
 local lastDir = "down"
+
+local healthSpriteText = gfx.sprite.spriteWithText("VIBES: 4", 1000, 13)
+healthSpriteText:setCenter(0, 0)
+healthSpriteText:moveTo(tilemapOffsetX, 226)
+healthSpriteText:setZIndex(10)
+healthSpriteText:add()
+
+
 
 function playdate.update()
   gfx.setColor(gfx.kColorWhite)
@@ -84,11 +101,8 @@ function playdate.update()
   elseif lastDir == "left" then
     playerSprite:setImage(playerRightImage, gfx.kImageFlippedX)
   end
-
   playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
-  playdate.drawFPS(0,0)
 end
-
 
 --left button
 function playdate.leftButtonDown()
