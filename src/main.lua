@@ -7,27 +7,44 @@ local gfx = playdate.graphics
 local system6Font = gfx.font.new("fonts/SYSTEM6")
 gfx.setFont(system6Font)
 
+-- offset from upper left corner to start of tilemap
+local tilemapOffsetX = 8
+local tilemapOffsetY = 2
+local tileGridWidth = 12
+local tileGridHeight = 7
 local tilesImageTable = gfx.imagetable.new("pics/tiles")
 local tilemap = gfx.tilemap.new()
 tilemap:setImageTable(tilesImageTable)
-tilemap:setTiles({
-  1,1,1,1,1,1,1,1,1,1,1,1,
-  1,2,2,2,2,2,2,2,2,2,2,1,
-  1,2,2,2,2,2,2,2,2,2,2,1,
-  1,2,2,2,2,2,2,2,2,2,2,1,
-  1,2,2,2,2,2,2,2,2,2,2,1,
-  1,2,2,2,2,2,2,2,2,2,2,1,
-  1,1,1,1,1,1,1,1,1,1,1,1,
-}, 12)
 
-local tilemapOffsetX = 8
-local tilemapOffsetY = 2
+local function setupTilesForScreen()
+  gfx.sprite.addWallSprites(tilemap, {2}, tilemapOffsetX, tilemapOffsetY)
+  tilemap:setTiles({
+    1,1,1,1,1,1,1,1,1,1,1,1,
+    1,2,2,2,2,2,2,2,1,2,2,1,
+    1,2,2,2,2,2,2,2,1,2,2,1,
+    1,2,2,1,2,2,2,2,1,2,2,1,
+    1,2,2,1,2,2,2,2,2,2,2,1,
+    1,2,2,1,2,2,2,2,2,2,2,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,
+  }, tileGridWidth)
+end
+
+local function canGoTo(x, y)
+  -- check tile (adjust) for lua 1 index ew
+  local nextTileIndex = tilemap:getTileAtPosition(x + 1, y + 1)
+  if nextTileIndex == 2 then
+    return true
+  else
+    return false
+  end
+  return false
+end
 
 -- these assume that tilemap is 32 x 32 squares
-function gridToScreenX(x)
+local function gridToScreenX(x)
   return x * 32 + tilemapOffsetX + 16
 end
-function gridToScreenY(y)
+local function gridToScreenY(y)
   return y * 32 + tilemapOffsetY + 16
 end
 
@@ -40,20 +57,6 @@ local playerSprite = gfx.sprite.new(playerImage)
 local x = 1
 local y = 1
 
-function wrapXY()
-  if x > 11 then
-    x = 0
-  end
-  if x < 0 then
-    x = 11
-  end
-  if y > 6 then
-    y = 0
-  end
-  if y < 0 then
-    y = 6
-  end
-end
 
 playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
 playerSprite:setZIndex(playerZ)
@@ -72,7 +75,7 @@ gfx.setColor(gfx.kColorWhite)
 gfx.fillRect(0,0,400,240)
 
 gfx.sprite.setBackgroundDrawingCallback(
-  function( x, y, width, height)
+  function( _x, _y, width, height)
     tilemap:draw(tilemapOffsetX, tilemapOffsetY)
   end
 )
@@ -85,7 +88,8 @@ healthSpriteText:moveTo(tilemapOffsetX, 226)
 healthSpriteText:setZIndex(10)
 healthSpriteText:add()
 
-
+--init section
+setupTilesForScreen()
 
 function playdate.update()
   gfx.setColor(gfx.kColorWhite)
@@ -106,31 +110,36 @@ end
 
 --left button
 function playdate.leftButtonDown()
-  x -= 1
-  lastDir = "left"
-  wrapXY()
+  if canGoTo(x -1, y) then    
+    x -= 1
+    lastDir = "left"
+  end
 end
 
 
 --right button
 function playdate.rightButtonDown()
-  x += 1
-  lastDir = "right"
-  wrapXY()
+  
+  if canGoTo(x + 1, y) then    
+    x += 1
+    lastDir = "right"
+  end
 end
 
 --down button
 function playdate.downButtonDown()
-  y += 1
-  lastDir = "down"
-  wrapXY()      
+  if canGoTo(x, y + 1) then 
+    y += 1
+    lastDir = "down"
+  end
 end
 
 
 --up button
 function playdate.upButtonDown()
-  y -= 1
-  lastDir = "up"
-  wrapXY()      
+  if canGoTo(x, y - 1) then 
+    y -= 1
+    lastDir = "up"
+  end
 end
 
