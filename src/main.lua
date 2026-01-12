@@ -7,6 +7,46 @@ local gfx = playdate.graphics
 local system6Font = gfx.font.new("fonts/SYSTEM6")
 gfx.setFont(system6Font)
 
+local currentLevel = 1
+local levels = {
+  {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1,
+    1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1,
+    1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1,
+    1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1,
+    1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  },
+  {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1,
+    1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1,
+    1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1,
+    1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1,
+    1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  },
+}
+
+local stairLocs = {
+  {
+    10, 1
+  },
+  {
+    9, 1
+  }
+}
+
+local startLocs = {
+  {
+    1, 5
+  },
+  {
+    1, 1
+  }
+}
+
 -- offset from upper left corner to start of tilemap
 local tilemapOffsetX = 8
 local tilemapOffsetY = 2
@@ -16,18 +56,6 @@ local tilesImageTable = gfx.imagetable.new("pics/tiles")
 local tilemap = gfx.tilemap.new()
 tilemap:setImageTable(tilesImageTable)
 
-local function setupTilesForScreen()
-  gfx.sprite.addWallSprites(tilemap, {2}, tilemapOffsetX, tilemapOffsetY)
-  tilemap:setTiles({
-    1,1,1,1,1,1,1,1,1,1,1,1,
-    1,2,2,2,2,2,2,2,1,2,2,1,
-    1,2,2,2,2,2,2,2,1,2,2,1,
-    1,2,2,1,2,2,2,2,1,2,2,1,
-    1,2,2,1,2,2,2,2,2,2,2,1,
-    1,2,2,1,2,2,2,2,2,2,2,1,
-    1,1,1,1,1,1,1,1,1,1,1,1,
-  }, tileGridWidth)
-end
 
 local function canGoTo(x, y)
   -- check tile (adjust) for lua 1 index ew
@@ -72,10 +100,10 @@ stairsSprite:setZIndex(stairZ)
 stairsSprite:add()
 
 gfx.setColor(gfx.kColorWhite)
-gfx.fillRect(0,0,400,240)
+gfx.fillRect(0, 0, 400, 240)
 
 gfx.sprite.setBackgroundDrawingCallback(
-  function( _x, _y, width, height)
+  function(_x, _y, width, height)
     tilemap:draw(tilemapOffsetX, tilemapOffsetY)
   end
 )
@@ -89,11 +117,27 @@ healthSpriteText:setZIndex(10)
 healthSpriteText:add()
 
 --init section
-setupTilesForScreen()
+local function setupTilesForScreen(level)
+  -- reset player to start pos for this floor
+  x = startLocs[currentLevel][1]
+  y = startLocs[currentLevel][2]
+  -- reset stair position too
+  stairX = stairLocs[currentLevel][1]
+  stairY = stairLocs[currentLevel][2]
+  -- actually move sprites for player/stairs
+  playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
+  stairsSprite:moveTo(gridToScreenX(stairX), gridToScreenY(stairY))
+  -- set tilemap to current level layout
+  tilemap:setTiles(levels[level], tileGridWidth)
+  -- finally, reset player sprite dir
+  lastDir = "down"
+end
+-- start for level 1
+setupTilesForScreen(1)
 
 function playdate.update()
   gfx.setColor(gfx.kColorWhite)
-  gfx.fillRect(0,0,400,240)
+  gfx.fillRect(0, 0, 400, 240)
   gfx.sprite.update()
   gfx.setColor(gfx.kColorBlack)
   if lastDir == "down" then
@@ -106,21 +150,30 @@ function playdate.update()
     playerSprite:setImage(playerRightImage, gfx.kImageFlippedX)
   end
   playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
+
+  if x == stairX and y == stairY then
+    -- on da stairs
+    print("we on da stairs")
+    currentLevel += 1
+    if currentLevel > table.getsize(levels) then
+      print("oof loop that shi play bo")
+      currentLevel = 1
+    end
+    setupTilesForScreen(currentLevel)
+  end
 end
 
 --left button
 function playdate.leftButtonDown()
-  if canGoTo(x -1, y) then    
+  if canGoTo(x - 1, y) then
     x -= 1
     lastDir = "left"
   end
 end
 
-
 --right button
 function playdate.rightButtonDown()
-  
-  if canGoTo(x + 1, y) then    
+  if canGoTo(x + 1, y) then
     x += 1
     lastDir = "right"
   end
@@ -128,18 +181,16 @@ end
 
 --down button
 function playdate.downButtonDown()
-  if canGoTo(x, y + 1) then 
+  if canGoTo(x, y + 1) then
     y += 1
     lastDir = "down"
   end
 end
 
-
 --up button
 function playdate.upButtonDown()
-  if canGoTo(x, y - 1) then 
+  if canGoTo(x, y - 1) then
     y -= 1
     lastDir = "up"
   end
 end
-
