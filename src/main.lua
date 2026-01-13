@@ -80,7 +80,6 @@ local function canGoTo(x, y)
   else
     return false
   end
-  return false
 end
 
 -- these assume that tilemap is 32 x 32 squares
@@ -118,7 +117,7 @@ gfx.setColor(gfx.kColorWhite)
 gfx.fillRect(0, 0, 400, 240)
 
 gfx.sprite.setBackgroundDrawingCallback(
-  function(_x, _y, width, height)
+  function(_x, _y, _width, _height)
     tilemap:draw(tilemapOffsetX, tilemapOffsetY)
   end
 )
