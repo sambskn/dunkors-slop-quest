@@ -20,6 +20,15 @@ local levels = {
   },
   {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+    1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1,
+    1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  },
+  {
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1,
     1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1,
     1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 1,
@@ -34,6 +43,9 @@ local stairLocs = {
     10, 1
   },
   {
+    1, 1
+  },
+  {
     9, 1
   }
 }
@@ -41,6 +53,9 @@ local stairLocs = {
 local startLocs = {
   {
     1, 5
+  },
+  {
+    10, 5
   },
   {
     1, 1
@@ -116,6 +131,13 @@ healthSpriteText:moveTo(tilemapOffsetX, 226)
 healthSpriteText:setZIndex(10)
 healthSpriteText:add()
 
+local offsetXForLevelText = 200
+local levelSpriteText = gfx.sprite.spriteWithText(string.format("LEVEL: %d", currentLevel), 1000, 13)
+levelSpriteText:setCenter(0, 0)
+levelSpriteText:moveTo(tilemapOffsetX + offsetXForLevelText, 226)
+levelSpriteText:setZIndex(10)
+levelSpriteText:add()
+
 --init section
 local function setupTilesForScreen(level)
   -- reset player to start pos for this floor
@@ -159,6 +181,10 @@ function playdate.update()
       print("oof loop that shi play bo")
       currentLevel = 1
     end
+    local newLevelTextImage = gfx.imageWithText(
+      string.format("LEVEL: %d", currentLevel), 1000, 13
+    )
+    levelSpriteText:setImage(newLevelTextImage)
     setupTilesForScreen(currentLevel)
   end
 end
