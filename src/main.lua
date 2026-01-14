@@ -10,6 +10,10 @@ local synth = playdate.sound.synth.new(playdate.sound.kWaveSawtooth)
 synth:setAttack(0.0125)
 synth:setSustain(0.2)
 synth:setRelease(0.125)
+local noiseSynth = playdate.sound.synth.new(playdate.sound.kWaveNoise)
+synth:setAttack(0.05)
+synth:setSustain(0)
+synth:setRelease(0.25)
 
 local function moveNoise()
   local time = playdate.sound.getCurrentTime()
@@ -20,8 +24,15 @@ end
 local function bonkNoise()
   local time = playdate.sound.getCurrentTime()
   synth:playNote("G2", 0.5, 0.2, time)
-  synth:playNote("F2", 0.5, 0.2, time + 0.1)
-  synth:playNote("C2", 0.6, 0.2, time + 0.25)
+  synth:playNote("F2", 0.5, 0.2, time + 0.51)
+  synth:playNote("C2", 0.6, 0.2, time + 1.02)
+end
+
+local function stairsNoise()
+  local time = playdate.sound.getCurrentTime()
+  noiseSynth:playNote("C3", 0.1, 0.2, time)
+  noiseSynth:playNote("B3", 0.1, 0.2, time + 0.11)
+  noiseSynth:playNote("A3", 0.1, 0.2, time + 0.21)
 end
 
 -- font import yknow - this one nice
@@ -215,6 +226,7 @@ function playdate.update()
   end
 
   if x == stairX and y == stairY then
+    stairsNoise()
     -- on da stairs
     print("we on da stairs")
     currentLevel += 1
