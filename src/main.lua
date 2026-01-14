@@ -1,6 +1,7 @@
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
+import "CoreLibs/math"
 
 local gfx = playdate.graphics
 
@@ -98,7 +99,8 @@ local playerSprite = gfx.sprite.new(playerImage)
 
 local x = 1
 local y = 1
-
+local playerSpriteTargetX = gridToScreenX(x)
+local playerSpriteTargetY = gridToScreenY(y)
 
 playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
 playerSprite:setZIndex(playerZ)
@@ -170,7 +172,26 @@ function playdate.update()
   elseif lastDir == "left" then
     playerSprite:setImage(playerRightImage, gfx.kImageFlippedX)
   end
-  playerSprite:moveTo(gridToScreenX(x), gridToScreenY(y))
+  local newX = gridToScreenX(x)
+  local newY = gridToScreenY(y)
+  if newX ~= playerSpriteTargetX or newY ~= playerSpriteTargetY then
+    playerSpriteTargetX = newX
+    playerSpriteTargetY = newY
+  end
+  if playerSprite.x ~= playerSpriteTargetX or playerSprite.y ~= playerSpriteTargetY then
+    -- figure out amount to move
+    local diffX = playerSpriteTargetX - playerSprite.x
+    local diffY = playerSpriteTargetY - playerSprite.y
+    local newX = playdate.math.lerp(playerSprite.x, playerSpriteTargetX, 0.2)
+    local newY = playdate.math.lerp(playerSprite.y, playerSpriteTargetY, 0.2)
+    if math.abs(diffX) < 0.1 then
+      newX = playerSpriteTargetX
+    end
+    if math.abs(diffY) < 0.1 then
+      newY = playerSpriteTargetY
+    end
+    playerSprite:moveTo(newX, newY)
+  end
 
   if x == stairX and y == stairY then
     -- on da stairs
