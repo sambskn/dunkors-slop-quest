@@ -5,9 +5,30 @@ import "CoreLibs/math"
 
 local gfx = playdate.graphics
 
+-- sounds
+local synth = playdate.sound.synth.new(playdate.sound.kWaveSawtooth)
+synth:setAttack(0.0125)
+synth:setSustain(0.2)
+synth:setRelease(0.125)
+
+local function moveNoise()
+  local time = playdate.sound.getCurrentTime()
+  synth:playNote("C3", 0.5, 0.2, time)
+  synth:playNote("F3", 0.5, 0.2, time + 0.1)
+end
+
+local function bonkNoise()
+  local time = playdate.sound.getCurrentTime()
+  synth:playNote("G2", 0.5, 0.2, time)
+  synth:playNote("F2", 0.5, 0.2, time + 0.1)
+  synth:playNote("C2", 0.6, 0.2, time + 0.25)
+end
+
+-- font import yknow - this one nice
 local system6Font = gfx.font.new("fonts/SYSTEM6")
 gfx.setFont(system6Font)
 
+-- level? config????
 local currentLevel = 1
 local levels = {
   {
@@ -214,6 +235,9 @@ function playdate.leftButtonDown()
   if canGoTo(x - 1, y) then
     x -= 1
     lastDir = "left"
+    moveNoise()
+  else
+    bonkNoise()
   end
 end
 
@@ -222,6 +246,9 @@ function playdate.rightButtonDown()
   if canGoTo(x + 1, y) then
     x += 1
     lastDir = "right"
+    moveNoise()
+  else
+    bonkNoise()
   end
 end
 
@@ -230,6 +257,9 @@ function playdate.downButtonDown()
   if canGoTo(x, y + 1) then
     y += 1
     lastDir = "down"
+    moveNoise()
+  else
+    bonkNoise()
   end
 end
 
@@ -238,5 +268,8 @@ function playdate.upButtonDown()
   if canGoTo(x, y - 1) then
     y -= 1
     lastDir = "up"
+    moveNoise()
+  else
+    bonkNoise()
   end
 end
