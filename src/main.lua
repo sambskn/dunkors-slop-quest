@@ -244,9 +244,9 @@ end
 
 --left button
 function playdate.leftButtonDown()
+  lastDir = "left"
   if canGoTo(x - 1, y) then
     x -= 1
-    lastDir = "left"
     moveNoise()
   else
     bonkNoise()
@@ -255,9 +255,9 @@ end
 
 --right button
 function playdate.rightButtonDown()
+  lastDir = "right"
   if canGoTo(x + 1, y) then
     x += 1
-    lastDir = "right"
     moveNoise()
   else
     bonkNoise()
@@ -266,9 +266,9 @@ end
 
 --down button
 function playdate.downButtonDown()
+  lastDir = "down"
   if canGoTo(x, y + 1) then
     y += 1
-    lastDir = "down"
     moveNoise()
   else
     bonkNoise()
@@ -277,9 +277,9 @@ end
 
 --up button
 function playdate.upButtonDown()
+  lastDir = "up"
   if canGoTo(x, y - 1) then
     y -= 1
-    lastDir = "up"
     moveNoise()
   else
     bonkNoise()
